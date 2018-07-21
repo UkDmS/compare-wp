@@ -36,6 +36,16 @@ foreach ( $fields as $field => $show ) {
 unset($fields['add-to-cart']);
 unset($fields['sku']);
 // print_r($fields);
+function generatePassword($length = 8){
+    $chars = 'abcdefghijklmnoprstuywxzqABCDEFGHIJKLMNOPRSTUYWXZQ123456789';
+    $numChars = strlen($chars);
+    $string = '';
+    for ($i = 0; $i < $length; $i++) {
+        $string .= substr($chars, rand(1, $numChars) - 1, 1);
+    }
+    return $string;
+}
+$id = generatePassword(12);
 
 ?>
 <style>
@@ -146,71 +156,7 @@ width: 320px;
                     <?php endif; ?>
                 </tbody>
             </table>
-            <script>
-            jQuery("document").ready(function(){
-                var ind, count=0,ind=0;
-                jQuery(".compare-list tbody tr:not([class=image])").each(function(){
-                    jQuery("td",this).each(function(){
-                        count++;
-                        if(jQuery(this).text().replace(/\s{2,}/g, '')==='') {
-                          ind++;
-                        }
-                    });
-                    if(ind===count) {
-                        jQuery(this).css("display","none");
-                    }
-                    count = 0;
-                    ind = 0;
-                });
 
-                function getCookie(name) {
-                    var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
-                    return matches ? decodeURIComponent(matches[1]) : undefined;
-                }
-
-                function setCookie(c_name, value, exdays, path) {
-                    exdays = exdays || 30;
-                    path = path || '/';
-
-                    var exdate = new Date();
-                    exdate.setDate(exdate.getDate() + exdays);
-                    var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-                    document.cookie = c_name + "=" + c_value + "; path=" + path;
-                }
-
-                jQuery("body").on("click",".remove-compare",function(){
-                    var product_id, cookie, position;
-                    product_id = jQuery(this).data("product_id");
-                    cookie = getCookie('yith_woocompare_list');
-                    cookie = JSON.parse(cookie);
-                    position = cookie.indexOf(product_id);
-                    cookie.splice(position, 1);
-                    jQuery(".compare-list tr").each(function(){
-                    jQuery("td",this).each(function(){
-                        if(jQuery(this).hasClass('product_'+product_id)){
-                          jQuery(this).remove();
-                        }
-                    });
-                    });
-                    jQuery('.compare-item').each( function() {
-                        console.log(jQuery(this).data("product_id"));
-                        if(jQuery(this).data("product_id")==product_id)
-                        {
-                            jQuery(this).remove();
-                        }
-                    });
-                    if(cookie.length===0) {
-                        jQuery(".count-compare").html('');
-                        jQuery(".compare-list tbody").empty().html("<tr class='no-products'><td>Нет товаров для сравнения.</td></tr>");
-                        jQuery(".compare-list").css("width","100%");
-                    } else
-                        jQuery(".count-compare").html(cookie.length);
-                    cookie = JSON.stringify(cookie);
-                    console.log(cookie);
-                    setCookie('yith_woocompare_list', cookie, 1, '/');
-                })
-            });
-            </script>
 <style>
 table.compare-list .stock td span {
     color: #090;
@@ -234,15 +180,110 @@ table.compare-list tr{
 border-bottom: 1px dashed #3dacc2;
     height: 50px;
 }
+.success-mail-compare{
+color: green;
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+}
 
 </style>
+ <script>
+            jQuery("document").ready(function(){
+                var ind, count=0,ind=0;
+                jQuery(".compare-list tbody tr:not([class=image])").each(function(){
+                    jQuery("td",this).each(function(){
+                        count++;
+                        if(jQuery(this).text().replace(/\s{2,}/g, '')==='') {
+                          ind++;
+                        }
+                    });
+                    if(ind===count) {
+                        jQuery(this).remove();
+                    }
+                    count = 0;
+                    ind = 0;
+                });
+
+                function getCookie(name) {
+                    var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
+                    return matches ? decodeURIComponent(matches[1]) : undefined;
+                }
+
+                function setCookie(c_name, value, exdays, path) {
+                    exdays = exdays || 30;
+                    path = path || '/';
+
+                    var exdate = new Date();
+                    exdate.setDate(exdate.getDate() + exdays);
+                    var c_value = escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+                    document.cookie = c_name + "=" + c_value + "; path=" + path;
+                }
+
+                function dec2hex (dec) {
+                    return ('0' + dec.toString(16)).substr(-2);
+                }
+
+                function generateId (len) {
+                    var arr = new Uint8Array((len || 40) / 2);
+                    window.crypto.getRandomValues(arr);
+                    return Array.from(arr, dec2hex).join('');
+                }
+
+                jQuery("body").on("click",".remove-compare",function() {
+                    var product_id, cookie, position;
+                    product_id = jQuery(this).data("product_id");
+                    cookie = getCookie('yith_woocompare_list');
+                    cookie = JSON.parse(cookie);
+                    position = cookie.indexOf(product_id);
+                    cookie.splice(position, 1);
+                    jQuery(".compare-list tr").each(function() {
+                        jQuery("td",this).each(function(){
+                            if(jQuery(this).hasClass('product_'+product_id)) {
+                                jQuery(this).remove();
+                            }
+                        });
+                    });
+                    jQuery('.compare-item').each( function() {
+                        if(jQuery(this).data("product_id")==product_id) {
+                            jQuery(this).remove();
+                        }
+                    });
+                    if(cookie.length===0) {
+                        jQuery(".count-compare").html('');
+                        jQuery(".compare-list tbody").empty().html("<tr class='no-products'><td>Нет товаров для сравнения.</td></tr>");
+                        jQuery(".compare-list").css("width","100%");
+                    } else
+                        jQuery(".count-compare").html(cookie.length);
+                    cookie = JSON.stringify(cookie);
+                    console.log(cookie);
+                    setCookie('yith_woocompare_list', cookie, 1, '/');
+                });
+                 //jQuery(".attachment").val(generateId());
+                jQuery(".compare-mail").click(function(e) {
+                    e.preventDefault();
+                    jQuery.ajax({ type: "POST",
+                    url: 'https://'+window.location.hostname+'/compare_mail.php',
+                    data: "name="+jQuery(".username-compare").val()+"&phone="+jQuery(".email-compare").val()+"&attachment="+jQuery(".attachment").val(),
+                    success: function(data) {
+                        jQuery('.body-send-compare').css("display","none");
+                        jQuery('#send_compare').append("<div class='success-mail-compare'>Ваше сообщение отправлено</div>");
+                        setTimeout(function() {
+                            parent.jQuery.fancybox.close();
+                            jQuery('.body-send-compare').css("display","block");
+                            jQuery(".success-mail-compare").css("display","none")}, 1500);
+                        }
+                    });
+                });
+            });
+            </script>
             <?
+
                 $output = ob_get_contents();
                 ob_end_clean();
-                $path = "comparehtml/".time().'.html';
-                $fp = fopen($path, 'w');
-                fwrite($fp, $output);
-                fclose($fp);
+
+
+                $_SESSION[$id] = $output;
                 echo $output;
             ?>
             </div>
@@ -251,29 +292,31 @@ border-bottom: 1px dashed #3dacc2;
 </div>
 <div style="display:none" class="fancybox-hidden">
 <div id="send_compare">
+        <div class="body-send-compare">
 		<form action="" method="post" class="" novalidate="novalidate">
+
 			<div class="form-he4der">Сравнение товаров</div>
 			<p class="smallcomment" style="text-align: center">
                 Пожалуйста, введите Ваше имя и адрес электронной <br>почты, на который хотите получить результат сравнения товаров:
 			</p>
             <p>Ваше имя <br>
 			    <span class="wpcf7-form-control-wrap your-name">
-			    	<input type="text" name="your-name" required="" value="" size="40" class="wpcf7-form-control wpcf7-text username" aria-invalid="false" placeholder="Как к Вам обращаться?">
+			    	<input type="text" name="your-name" required="" value="" size="40" class="username-compare" aria-invalid="false" placeholder="Как к Вам обращаться?">
 			    </span>
 			</p>
 			<p>E-mail*<br>
 			    <span class="wpcf7-form-control-wrap your-email">
-			    	<input type="text" name="your-email" value="" size="40" required="" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required email" aria-required="true" aria-invalid="false" placeholder="Для обратной связи">
+			    	<input type="text" name="your-email" value="" size="40" required="" class="email-compare" aria-required="true" aria-invalid="false" placeholder="Для обратной связи">
 			    </span>
 			    </p>
 			<p style="text-align: center;">Нажимая на кнопку «Отправить», <br>Вы принимаете условия <a href="https://www.beautysystems.ru/privacy-policy/" target="_blank">Пользовательского соглашения</a>.</p>
-                <input type="hidden" name="attachment" value="<?=$path; ?>" />
+                <input type="hidden" name="attachment" class="attachment" value='<? echo $id ?>'/>
 			<p class="form-button">
 				<input type="checkbox" required="" name="agree-safe" value="1" style="display: none;" class="agree-safe">
-				<input type="submit" value="Отправить" class="btn btn-primary">
-				<span class="ajax-loader"></span>
+				<input type="submit" value="Отправить" class="btn btn-primary compare-mail">
 			</p>
 		</form>
+        </div>
 	</div>
 	 		</div>
 
