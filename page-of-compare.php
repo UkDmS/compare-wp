@@ -220,16 +220,6 @@ color: green;
                     document.cookie = c_name + "=" + c_value + "; path=" + path;
                 }
 
-                function dec2hex (dec) {
-                    return ('0' + dec.toString(16)).substr(-2);
-                }
-
-                function generateId (len) {
-                    var arr = new Uint8Array((len || 40) / 2);
-                    window.crypto.getRandomValues(arr);
-                    return Array.from(arr, dec2hex).join('');
-                }
-
                 jQuery("body").on("click",".remove-compare",function() {
                     var product_id, cookie, position;
                     product_id = jQuery(this).data("product_id");
@@ -259,7 +249,7 @@ color: green;
                     console.log(cookie);
                     setCookie('yith_woocompare_list', cookie, 1, '/');
                 });
-                 //jQuery(".attachment").val(generateId());
+
                 jQuery(".compare-mail").click(function(e) {
                     e.preventDefault();
                     jQuery.ajax({ type: "POST",
